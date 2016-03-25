@@ -35,11 +35,12 @@ cleanFile() {
         echo 'Failed to identify '$FILE >&2
         continue
     fi
-
-
 }
 
-# Loop through all mkv files in directory
-$FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
-    cleanFile "$FILE"
-done
+cleanDirectory() {
+    $FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
+        cleanFile "$FILE"
+    done
+}
+
+cleanDirectory $1
