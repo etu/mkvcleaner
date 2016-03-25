@@ -13,12 +13,6 @@ WANTED_LANGS=(
 MKVMERGE=$(which mkvmerge)
 FIND=$(which find)
 
-# Require path as argument
-if ! test -d "$1"; then
-    echo 'Missing or invalid DIRECTORY parameter' >&2
-    exit 1
-fi
-
 cleanFile() {
     if ! test -f "$1"; then
         echo 'FILE is not a regular file' >&2
@@ -43,4 +37,12 @@ cleanDirectory() {
     done
 }
 
-cleanDirectory $1
+# If parameter is a file, run this file
+if test -f "$1"; then
+    cleanFile "$1"
+fi
+
+# If parameter is a directory, run for directories
+if test -d "$1"; then
+    cleanDirectory "$1"
+fi
