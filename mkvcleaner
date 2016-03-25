@@ -20,11 +20,11 @@ if ! test -d $1; then
 fi
 
 # Loop through all mkv files in directory
-for FILE in $($FIND $1 -type f -iname '*.mkv'); do
+$FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
     #FILE=$FILE"___"
 
     # Run mkvmerge identify to check contents of file
-    OUTPUT=$($MKVMERGE --identify-verbose $FILE)
+    OUTPUT=$($MKVMERGE --identify-verbose "$FILE")
 
     # If failure, skip out and continue loop
     if test $? -ne 0; then
