@@ -19,9 +19,13 @@ if ! test -d "$1"; then
     exit 1
 fi
 
-# Loop through all mkv files in directory
-$FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
-    #FILE=$FILE"___"
+cleanFile() {
+    if ! test -f "$1"; then
+        echo 'FILE is not a regular file' >&2
+        exit 2
+    fi
+
+    FILE=$1
 
     # Run mkvmerge identify to check contents of file
     OUTPUT=$($MKVMERGE --identify-verbose "$FILE")
@@ -31,4 +35,11 @@ $FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
         echo 'Failed to identify '$FILE >&2
         continue
     fi
+
+
+}
+
+# Loop through all mkv files in directory
+$FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
+    cleanFile "$FILE"
 done
