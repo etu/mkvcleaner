@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Change this to choose wanted languages
+WANTED_LANGS=(
+    "und"
+    "eng"
+    "swe"
+    "jap"
+    "jpn"
+)
+
+# Paths to used programs
+MKVMERGE=$(which mkvmerge)
+FIND=$(which find)
+
+# Require path as argument
+if ! test -d $1; then
+    echo 'Missing DIRECTORY parameter' >&2
+    exit 1
+fi
+
+# Loop through all mkv files in directory
+for FILE in $($FIND $1 -type f -iname '*.mkv'); do
+    #FILE=$FILE"___"
+
+    # Run mkvmerge identify to check contents of file
+    OUTPUT=$($MKVMERGE --identify-verbose $FILE)
+
+    # If failure, skip out and continue loop
+    if test $? -ne 0; then
+        echo 'Failed to identify '$FILE >&2
+        continue
+    fi
+done
