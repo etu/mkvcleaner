@@ -1,6 +1,8 @@
 #!/bin/sh
 
-# Change this to choose wanted languages
+###
+# Wanted languages to keep
+##
 WANTED_LANGS=(
     "und"
     "eng"
@@ -9,10 +11,17 @@ WANTED_LANGS=(
     "jpn"
 )
 
+
+###
 # Paths to used programs
+##
 MKVMERGE=$(which mkvmerge)
 FIND=$(which find)
 
+
+###
+# Wrapper to do cleaning of files
+##
 cleanFile() {
     if ! test -f "$1"; then
         echo 'FILE is not a regular file' >&2
@@ -31,18 +40,29 @@ cleanFile() {
     fi
 }
 
+
+###
+# Wrapper to loop through all mkv files recurively in a directory to
+# run cleanFile on each mkv-file
+##
 cleanDirectory() {
     $FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
         cleanFile "$FILE"
     done
 }
 
+
+###
 # If parameter is a file, run this file
+##
 if test -f "$1"; then
     cleanFile "$1"
 fi
 
+
+###
 # If parameter is a directory, run for directories
+##
 if test -d "$1"; then
     cleanDirectory "$1"
 fi
