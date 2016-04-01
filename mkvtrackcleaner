@@ -50,10 +50,11 @@ cleanFile() {
         continue
     fi
 
-    # Find audio and subtitle tracks
+    # Variables to collect all audio and subtitle tracks in the file
     AUDIO=()
     SUBTITLE=()
 
+    # Loop through lines in output
     IFS=$'\n'
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
