@@ -17,6 +17,8 @@ WANTED_LANGS=(
 ##
 MKVMERGE=$(which mkvmerge)
 FIND=$(which find)
+GREP=$(which grep)
+SED=$(which sed)
 
 
 ###
@@ -53,15 +55,15 @@ cleanFile() {
     IFS=$'\n'
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
-        if test $(echo $LINE | grep -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
+        if test $(echo $LINE | $GREP -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
             echo -n "audio => "
-            echo $LINE | sed -E $SED_EXTRACT_INFO
+            echo $LINE | $SED -E $SED_EXTRACT_INFO
         fi
 
         # Match if current track is a subtitle track
-        if test $(echo $LINE | grep -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
+        if test $(echo $LINE | $GREP -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
             echo -n "subtitle => "
-            echo $LINE | sed -E $SED_EXTRACT_INFO
+            echo $LINE | $SED -E $SED_EXTRACT_INFO
         fi
     done
     unset IFS
