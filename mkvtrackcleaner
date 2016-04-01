@@ -25,6 +25,8 @@ FIND=$(which find)
 GREP_MATCH_AUDIO='Track ID (\d*): audio .* \[.*language:([^\s]+).*'
 GREP_MATCH_SUBS='Track ID (\d*): subtitles .* \[.*language:([^\s]+).*'
 
+SED_EXTRACT_INFO='s/Track ID ([0-9]*): .*language:(...).*/\1\t\2/'
+
 ###
 # Wrapper to do cleaning of files
 ##
@@ -52,12 +54,14 @@ cleanFile() {
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
         if test $(echo $LINE | grep -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
-            echo 'match audio'
+            echo -n "audio => "
+            echo $LINE | sed -E $SED_EXTRACT_INFO
         fi
 
         # Match if current track is a subtitle track
         if test $(echo $LINE | grep -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
-            echo 'match subtitle'
+            echo -n "subtitle => "
+            echo $LINE | sed -E $SED_EXTRACT_INFO
         fi
     done
     unset IFS
