@@ -55,17 +55,39 @@ cleanFile() {
     AUDIO=()
     SUBTITLE=()
 
+    # Variables to collect all audio and subtitle tracks we want to keep
+    WANTED_AUDIO=()
+    WANTED_SUBTITLE=()
+
     # Loop through lines in output
     IFS=$'\n'
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
         if test $(echo $LINE | $GREP -P $GREP_MATCH_AUDIO | $WC -l) -ne 0; then
-            AUDIO+=($(echo $LINE | $SED -E $SED_EXTRACT_INFO))
+            ROW=$(echo $LINE | $SED -E $SED_EXTRACT_INFO)
+
+            AUDIO+=($ROW)
+
+            # Filter through languages we want
+            for LANG in "${WANTED_LANGS[@]}"; do
+                if test $(echo $ROW | grep $LANG | wc -l) -ne 0; then
+                    WANTED_AUDIO+=($ROW)
+                fi
+            done
         fi
 
         # Match if current track is a subtitle track
         if test $(echo $LINE | $GREP -P $GREP_MATCH_SUBS | $WC -l) -ne 0; then
-            SUBTITLE+=($(echo $LINE | $SED -E $SED_EXTRACT_INFO))
+            ROW=$(echo $LINE | $SED -E $SED_EXTRACT_INFO)
+
+            SUBTITLE+=($ROW)
+
+            # Filter through languages we want
+            for LANG in "${WANTED_LANGS[@]}"; do
+                if test $(echo $ROW | grep $LANG | wc -l) -ne 0; then
+                    WANTED_SUBTITLE+=($ROW)
+                fi
+            done
         fi
     done
     unset IFS
@@ -76,6 +98,13 @@ cleanFile() {
     $PRINTF "%s\n" "${AUDIO[@]}"
     echo "Subtitle tracks:"
     $PRINTF "%s\n" "${SUBTITLE[@]}"
+
+    echo
+
+    echo "Audio tracks: (filtered)"
+    $PRINTF "%s\n" "${WANTED_AUDIO[@]}"
+    echo "Subtitle tracks: (filtered)"
+    $PRINTF "%s\n" "${WANTED_SUBTITLE[@]}"
 }
 
 
