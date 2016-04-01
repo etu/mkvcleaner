@@ -20,6 +20,12 @@ FIND=$(which find)
 
 
 ###
+# Regexes
+##
+GREP_MATCH_AUDIO='Track ID (\d*): audio .* \[.*language:([^\s]+).*'
+GREP_MATCH_SUBS='Track ID (\d*): subtitles .* \[.*language:([^\s]+).*'
+
+###
 # Wrapper to do cleaning of files
 ##
 cleanFile() {
@@ -38,6 +44,23 @@ cleanFile() {
         echo 'Failed to identify '$FILE >&2
         continue
     fi
+
+    # Find audio and subtitle tracks
+    #AUDIO=()
+    #SUBTITLE=()
+    IFS=$'\n'
+    for LINE in $OUTPUT; do
+        # Match if current track is a audio track
+        if test $(echo $LINE | grep -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
+            echo 'match audio'
+        fi
+
+        # Match if current track is a subtitle track
+        if test $(echo $LINE | grep -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
+            echo 'match subtitle'
+        fi
+    done
+    unset IFS
 }
 
 
