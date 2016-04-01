@@ -19,6 +19,7 @@ MKVMERGE=$(which mkvmerge)
 FIND=$(which find)
 GREP=$(which grep)
 SED=$(which sed)
+WC=$(which wc)
 
 
 ###
@@ -56,12 +57,12 @@ cleanFile() {
     IFS=$'\n'
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
-        if test $(echo $LINE | $GREP -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
+        if test $(echo $LINE | $GREP -P $GREP_MATCH_AUDIO | $WC -l) -ne 0; then
             AUDIO+=($(echo $LINE | $SED -E $SED_EXTRACT_INFO))
         fi
 
         # Match if current track is a subtitle track
-        if test $(echo $LINE | $GREP -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
+        if test $(echo $LINE | $GREP -P $GREP_MATCH_SUBS | $WC -l) -ne 0; then
             SUBTITLE+=($(echo $LINE | $SED -E $SED_EXTRACT_INFO))
         fi
     done
