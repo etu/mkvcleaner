@@ -67,6 +67,8 @@ cleanFile() {
     done
     unset IFS
 
+    echo "=================================="
+    echo "File: "$FILE
     echo "Audio tracks:"
     printf "%s\n" "${AUDIO[@]}"
     echo "Subtitle tracks:"
