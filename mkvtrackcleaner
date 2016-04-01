@@ -42,8 +42,10 @@ cleanFile() {
 
     FILE=$1
 
+
     # Run mkvmerge identify to check contents of file
     OUTPUT=$($MKVMERGE --identify-verbose "$FILE")
+
 
     # If failure, skip out and continue loop
     if test $? -ne 0; then
@@ -51,13 +53,16 @@ cleanFile() {
         continue
     fi
 
+
     # Variables to collect all audio and subtitle tracks in the file
     AUDIO=()
     SUBTITLE=()
 
+
     # Variables to collect all audio and subtitle tracks we want to keep
     WANTED_AUDIO=()
     WANTED_SUBTITLE=()
+
 
     # Loop through lines in output
     IFS=$'\n'
@@ -91,6 +96,7 @@ cleanFile() {
         fi
     done
     unset IFS
+
 
     echo "=================================="
     echo "File: "$FILE
