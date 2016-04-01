@@ -16,6 +16,7 @@ WANTED_LANGS=(
 # Paths to used programs
 ##
 MKVMERGE=$(which mkvmerge)
+PRINTF=$(which printf)
 FIND=$(which find)
 GREP=$(which grep)
 SED=$(which sed)
@@ -72,9 +73,9 @@ cleanFile() {
     echo "=================================="
     echo "File: "$FILE
     echo "Audio tracks:"
-    printf "%s\n" "${AUDIO[@]}"
+    $PRINTF "%s\n" "${AUDIO[@]}"
     echo "Subtitle tracks:"
-    printf "%s\n" "${SUBTITLE[@]}"
+    $PRINTF "%s\n" "${SUBTITLE[@]}"
 }
 
 
