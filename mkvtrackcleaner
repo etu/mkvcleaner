@@ -50,23 +50,27 @@ cleanFile() {
     fi
 
     # Find audio and subtitle tracks
-    #AUDIO=()
-    #SUBTITLE=()
+    AUDIO=()
+    SUBTITLE=()
+
     IFS=$'\n'
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
         if test $(echo $LINE | $GREP -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
-            echo -n "audio => "
-            echo $LINE | $SED -E $SED_EXTRACT_INFO
+            AUDIO+=($(echo $LINE | $SED -E $SED_EXTRACT_INFO))
         fi
 
         # Match if current track is a subtitle track
         if test $(echo $LINE | $GREP -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
-            echo -n "subtitle => "
-            echo $LINE | $SED -E $SED_EXTRACT_INFO
+            SUBTITLE+=($(echo $LINE | $SED -E $SED_EXTRACT_INFO))
         fi
     done
     unset IFS
+
+    echo "Audio tracks:"
+    printf "%s\n" "${AUDIO[@]}"
+    echo "Subtitle tracks:"
+    printf "%s\n" "${SUBTITLE[@]}"
 }
 
 
