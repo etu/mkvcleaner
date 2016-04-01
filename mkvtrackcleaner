@@ -103,7 +103,8 @@ cleanFile() {
     fi
 
 
-    if test ${#WANTED_AUDIO[@]} -eq ${#AUDIO[@]} -a ${#WANTED_SUBTITLE[@]} -eq ${#SUBTITLE[@]}; then
+    if test ${#WANTED_AUDIO[@]}    -eq ${#AUDIO[@]}     \
+         -a ${#WANTED_SUBTITLE[@]} -eq ${#SUBTITLE[@]}; then
         echo "No change after filtering detected, skipping: "$FILE >&2
         return
     fi
