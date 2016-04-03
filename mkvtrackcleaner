@@ -20,6 +20,7 @@ PRINTF=$(which printf)
 FIND=$(which find)
 GREP=$(which grep)
 SED=$(which sed)
+CUT=$(which cut)
 WC=$(which wc)
 
 
@@ -112,6 +113,20 @@ cleanFile() {
     fi
 
 
+    # Start building command to run
+    CMD=$(echo $MKVMERGE ' -o ' $FILE'.tmp')
+
+
+    # Specify audiotracks to keep
+    if ! test ${#WANTED_AUDIO[@]} -eq 0; then
+        # Build a comma-separated list of all audio track ID's
+        TRACKS=$(echo $($PRINTF "%s\n" "${WANTED_AUDIO[@]}" | $CUT -f 1) | $SED 's/ /,/g')
+
+        # Append to CMD
+        CMD=$(echo $CMD '--audio-tracks' $TRACKS)
+    fi
+
+
     echo "=================================="
     echo "File: "$FILE
     echo "Audio tracks:"
@@ -125,6 +140,11 @@ cleanFile() {
     $PRINTF "%s\n" "${WANTED_AUDIO[@]}"
     echo "Subtitle tracks: (filtered)"
     $PRINTF "%s\n" "${WANTED_SUBTITLE[@]}"
+
+    echo
+
+    echo "Muxing command:"
+    echo $CMD
 }
 
 
