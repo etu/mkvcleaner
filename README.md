@@ -20,3 +20,7 @@ or like this:
 ```bash
 ./mkvtrackcleaner /path/to/file.mkv
 ```
+
+## TODO
+Make some kind of config-file to avoid having to edit the file to set
+languages.
