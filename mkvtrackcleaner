@@ -97,10 +97,12 @@ cleanFile() {
     done
     unset IFS
 
+
     # If there's no wanted audio tracks, just save all the tracks
     if test ${#WANTED_AUDIO[@]} -eq 0; then
         WANTED_AUDIO=$AUDIO
     fi
+
 
     # Check for change and bail out if we don't need to mux the file
     if test ${#WANTED_AUDIO[@]}    -eq ${#AUDIO[@]}     \
