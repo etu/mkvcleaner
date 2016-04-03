@@ -124,6 +124,12 @@ cleanFile() {
 
         # Append to CMD
         CMD=$(echo $CMD '--audio-tracks' $TRACKS)
+
+        # Loop through all audio tracks and set --default-track to zero for all
+        # tracks
+        for ROW in "${WANTED_AUDIO[@]}"; do
+            CMD=$(echo $CMD '--default-track' $(echo $ROW | $CUT -d ' ' -f 1):0)
+        done
     fi
 
 
