@@ -85,3 +85,8 @@ Variables that's possible to alter includes:
 - `$GREP_MATCH_AUDIO` -- Regex to match audio tracks.
 - `$GREP_MATCH_SUBS` -- Regex to match subtitle tracks.
 - `$SED_EXTRACT_INFO` -- Regex to extract info about a track.
+
+# Tested on
+- Archlinux x86_64 2016-04-03
+- bash 4.3.42
+- mkvmerge v9.0.0
