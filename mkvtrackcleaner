@@ -133,6 +133,24 @@ cleanFile() {
     fi
 
 
+    # Specify subtitle tracks to keep
+    if test ${#WANTED_SUBTITLE[@]} -eq 0; then
+        CMD=$(echo $CMD '--no-subtitles')
+    else
+        # Build a comma-separated list of all audio track ID's
+        TRACKS=$(echo $($PRINTF "%s\n" "${WANTED_SUBTITLE[@]}" | $CUT -f 1) | $SED 's/ /,/g')
+
+        # Append to CMD
+        CMD=$(echo $CMD '--subtitle-tracks' $TRACKS)
+
+        # Loop through all audio tracks and set --default-track to zero for all
+        # tracks
+        for ROW in "${WANTED_SUBTITLE[@]}"; do
+            CMD=$(echo $CMD '--default-track' $(echo $ROW | $CUT -d ' ' -f 1):0)
+        done
+    fi
+
+
     echo "=================================="
     echo "File: "$FILE
     echo "Audio tracks:"
