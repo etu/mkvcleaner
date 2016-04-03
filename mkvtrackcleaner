@@ -34,6 +34,16 @@ SED_EXTRACT_INFO='s/Track ID ([0-9]*): .*language:(...).*/\1\t\2/'
 
 
 ###
+# Read config file
+##
+CONFIG_FILE=$(echo ${XDG_CONFIG_DIR:-$HOME/.config/}mkvtrackcleaner.conf)
+
+if test -f $CONFIG_FILE; then
+    source $CONFIG_FILE
+fi
+
+
+###
 # Wrapper to do cleaning of files
 ##
 cleanFile() {
