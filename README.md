@@ -38,8 +38,9 @@ or language tag of the track. It differs from player to player.
 - sed
 
 # Usage
-Edit the `WANTED_LANGS` array at the top of the file to specify
-languages that you want to keep, then run the script like this:
+Either edit the `WANTED_LANGS` array at the top of the script or create
+a config-file to alter the same variable to define which languages you
+want to keep, then run the script like this:
 ```bash
 ./mkvtrackcleaner /path/to/directory
 ```
