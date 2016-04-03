@@ -102,7 +102,7 @@ cleanFile() {
         WANTED_AUDIO=$AUDIO
     fi
 
-
+    # Check for change and bail out if we don't need to mux the file
     if test ${#WANTED_AUDIO[@]}    -eq ${#AUDIO[@]}     \
          -a ${#WANTED_SUBTITLE[@]} -eq ${#SUBTITLE[@]}; then
         echo "No change after filtering detected, skipping: "$FILE >&2
