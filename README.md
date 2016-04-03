@@ -7,10 +7,10 @@ tracks marked with a language that isn't in the list of wanted
 languages.
 
 ## Notes about languages
-Always keep the track `und` as a language. Lots of files out there
-with only one audio or subtitle track got it's only track marked as
-`undefined` language, so you probably always want to have `und` in your
-list of wanted languages.
+Always keep the `und` as a language. Lots of files out there with only
+one audio or subtitle track got it's only track marked as `undefined`
+language, so you probably always want to have `und` in your list of
+wanted languages.
 
 ## Notes about audio tracks
 If the script filter away all audio tracks, it will choose to not touch
