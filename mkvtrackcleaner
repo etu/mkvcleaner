@@ -32,6 +32,7 @@ GREP_MATCH_SUBS='Track ID (\d*): subtitles .* \[.*language:([^\s]+).*'
 
 SED_EXTRACT_INFO='s/Track ID ([0-9]*): .*language:(...).*/\1\t\2/'
 
+
 ###
 # Wrapper to do cleaning of files
 ##
@@ -155,24 +156,24 @@ cleanFile() {
     CMD=$(echo $CMD $FILE)
 
 
-    echo "=================================="
-    echo "File: "$FILE
-    echo "Audio tracks:"
-    $PRINTF "%s\n" "${AUDIO[@]}"
-    echo "Subtitle tracks:"
-    $PRINTF "%s\n" "${SUBTITLE[@]}"
+    # Run mkvmerge to remux the file
+    echo -n "Remuxing "$FILE" ... "
+    OUTPUT=$($CMD)
 
-    echo
+    # Print message success or failure message
+    if test $? -ne 0; then
+        echo "Failed :("
 
-    echo "Audio tracks: (filtered)"
-    $PRINTF "%s\n" "${WANTED_AUDIO[@]}"
-    echo "Subtitle tracks: (filtered)"
-    $PRINTF "%s\n" "${WANTED_SUBTITLE[@]}"
+        echo $OUTPUT
 
-    echo
+        # Remove temp file after failure
+        rm $FILE'.tmp'
+    else
+        echo "Success :)"
 
-    echo "Muxing command:"
-    echo $CMD
+        # Replace original file after success
+        mv $FILE'.tmp' $FILE
+    fi
 }
 
 
