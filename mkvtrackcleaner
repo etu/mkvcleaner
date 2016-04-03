@@ -151,6 +151,10 @@ cleanFile() {
     fi
 
 
+    # Append path to original file
+    CMD=$(echo $CMD $FILE)
+
+
     echo "=================================="
     echo "File: "$FILE
     echo "Audio tracks:"
