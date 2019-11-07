@@ -5,5 +5,9 @@ mkShell {
     gnumake
     go
     gocode
+
+    # Deps needed for goav
+    pkgconfig
+    ffmpeg-full
   ];
 }

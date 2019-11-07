@@ -1,2 +1,2 @@
 build:
-	go build -o mkvcleaner
+	env GOPATH= go build -o mkvcleaner
