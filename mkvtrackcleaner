@@ -13,18 +13,6 @@ WANTED_LANGS=(
 
 
 ###
-# Paths to used programs
-##
-MKVMERGE=$(which mkvmerge)
-PRINTF=$(which printf)
-FIND=$(which find)
-GREP=$(which grep)
-SED=$(which sed)
-CUT=$(which cut)
-WC=$(which wc)
-
-
-###
 # Regexes
 ##
 GREP_MATCH_AUDIO='Track ID (\d*): audio .* \[.*language:([^\s]+).*'
@@ -56,7 +44,7 @@ cleanFile() {
 
 
     # Run mkvmerge identify to check contents of file
-    OUTPUT=$($MKVMERGE --identify-verbose "$FILE")
+    OUTPUT=$(mkvmerge --identify-verbose "$FILE")
 
 
     # If failure, skip out and continue loop
@@ -80,8 +68,8 @@ cleanFile() {
     IFS=$'\n'
     for LINE in $OUTPUT; do
         # Match if current track is a audio track
-        if test $(echo $LINE | $GREP -P $GREP_MATCH_AUDIO | $WC -l) -ne 0; then
-            ROW=$(echo $LINE | $SED -E $SED_EXTRACT_INFO)
+        if test $(echo $LINE | grep -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
+            ROW=$(echo $LINE | sed -E $SED_EXTRACT_INFO)
 
             AUDIO+=($ROW)
 
@@ -94,8 +82,8 @@ cleanFile() {
         fi
 
         # Match if current track is a subtitle track
-        if test $(echo $LINE | $GREP -P $GREP_MATCH_SUBS | $WC -l) -ne 0; then
-            ROW=$(echo $LINE | $SED -E $SED_EXTRACT_INFO)
+        if test $(echo $LINE | grep -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
+            ROW=$(echo $LINE | sed -E $SED_EXTRACT_INFO)
 
             SUBTITLE+=($ROW)
 
@@ -125,13 +113,13 @@ cleanFile() {
 
 
     # Start building command to run
-    CMD=$(echo $MKVMERGE ' -o ' $FILE'.tmp')
+    CMD=$(echo mkvmerge ' -o ' $FILE'.tmp')
 
 
     # Specify audiotracks to keep
     if ! test ${#WANTED_AUDIO[@]} -eq 0; then
         # Build a comma-separated list of all audio track ID's
-        TRACKS=$(echo $($PRINTF "%s\n" "${WANTED_AUDIO[@]}" | $CUT -f 1) | $SED 's/ /,/g')
+        TRACKS=$(echo $(printf "%s\n" "${WANTED_AUDIO[@]}" | cut -f 1) | sed 's/ /,/g')
 
         # Append to CMD
         CMD=$(echo $CMD '--audio-tracks' $TRACKS)
@@ -139,7 +127,7 @@ cleanFile() {
         # Loop through all audio tracks and set --default-track to zero for all
         # tracks
         for ROW in "${WANTED_AUDIO[@]}"; do
-            CMD=$(echo $CMD '--default-track' $(echo $ROW | $CUT -d ' ' -f 1):0)
+            CMD=$(echo $CMD '--default-track' $(echo $ROW | cut -d ' ' -f 1):0)
         done
     fi
 
@@ -149,7 +137,7 @@ cleanFile() {
         CMD=$(echo $CMD '--no-subtitles')
     else
         # Build a comma-separated list of all audio track ID's
-        TRACKS=$(echo $($PRINTF "%s\n" "${WANTED_SUBTITLE[@]}" | $CUT -f 1) | $SED 's/ /,/g')
+        TRACKS=$(echo $(printf "%s\n" "${WANTED_SUBTITLE[@]}" | cut -f 1) | sed 's/ /,/g')
 
         # Append to CMD
         CMD=$(echo $CMD '--subtitle-tracks' $TRACKS)
@@ -157,7 +145,7 @@ cleanFile() {
         # Loop through all audio tracks and set --default-track to zero for all
         # tracks
         for ROW in "${WANTED_SUBTITLE[@]}"; do
-            CMD=$(echo $CMD '--default-track' $(echo $ROW | $CUT -d ' ' -f 1):0)
+            CMD=$(echo $CMD '--default-track' $(echo $ROW | cut -d ' ' -f 1):0)
         done
     fi
 
@@ -192,7 +180,7 @@ cleanFile() {
 # run cleanFile on each mkv-file
 ##
 cleanDirectory() {
-    $FIND $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
+    find $1 -type f -iname '*.mkv' -print0 | while read -d $'\0' FILE; do
         cleanFile "$FILE"
     done
 }

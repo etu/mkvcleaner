@@ -75,13 +75,6 @@ WANTED_LANGS=(
 
 Variables that's possible to alter includes:
 - `$WANTED_LANGS` -- Array with wanted languages in three letter codes.
-- `$MKVMERGE` -- Path to the `mkvmerge` binary.
-- `$PRINTF` -- Path to the `printf` binary.
-- `$FIND` -- Path to the `find` binary.
-- `$GREP` -- Path to the `grep` binary.
-- `$SED` -- Path to the `sed` binary.
-- `$CUT` -- Path to the `cut` binary.
-- `$WC` -- Path to the `wc` binary.
 - `$GREP_MATCH_AUDIO` -- Regex to match audio tracks.
 - `$GREP_MATCH_SUBS` -- Regex to match subtitle tracks.
 - `$SED_EXTRACT_INFO` -- Regex to extract info about a track.
