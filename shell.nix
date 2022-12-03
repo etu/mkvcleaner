@@ -2,7 +2,8 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    mkvtoolnix-cli # for mkvmerge
+    ffmpeg-full    # for ffprobe and ffmpeg
+    jq             # for jq
     coreutils-full # for printf, cut, wc
     findutils      # for find
     gnugrep        # for grep

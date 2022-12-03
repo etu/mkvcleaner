@@ -13,15 +13,6 @@ WANTED_LANGS=(
 
 
 ###
-# Regexes
-##
-GREP_MATCH_AUDIO='Track ID (\d*): audio .* \[.*language:([^\s]+).*'
-GREP_MATCH_SUBS='Track ID (\d*): subtitles .* \[.*language:([^\s]+).*'
-
-SED_EXTRACT_INFO='s/Track ID ([0-9]*): .*language:(...).*/\1\t\2/'
-
-
-###
 # Wrapper to do cleaning of files
 ##
 cleanFile() {
@@ -33,134 +24,139 @@ cleanFile() {
     FILE=$1
 
 
-    # Run mkvmerge identify to check contents of file
-    OUTPUT=$(mkvmerge --identify-verbose "$FILE")
+    # Use ffprobe to get the tracks of the file and make the json
+    # compact with jq.
+    OUTPUT=$(ffprobe -hide_banner -show_entries stream -print_format json -v panic -i "$FILE" | jq -c)
 
 
     # If failure, skip out and continue loop
     if test $? -ne 0; then
-        echo 'Failed to identify '$FILE >&2
-        continue
+        echo 'Failed to probe '$FILE >&2
+        return
     fi
 
 
-    # Variables to collect all audio and subtitle tracks in the file
+    # Variables to collect all tracks in the file.
     AUDIO=()
     SUBTITLE=()
+    VIDEO=()
 
 
-    # Variables to collect all audio and subtitle tracks we want to keep
+    # Variables to collect all tracks in the file to keep.
     WANTED_AUDIO=()
     WANTED_SUBTITLE=()
+    WANTED_VIDEO=()
 
 
-    # Loop through lines in output
-    IFS=$'\n'
-    for LINE in $OUTPUT; do
-        # Match if current track is a audio track
-        if test $(echo $LINE | grep -P $GREP_MATCH_AUDIO | wc -l) -ne 0; then
-            ROW=$(echo $LINE | sed -E $SED_EXTRACT_INFO)
+    # Loop through all tracks, temporary base64 encode them to not
+    # have spaces and stuff to mess up the loop.
+    for stream in $(echo $OUTPUT | jq -r -c '.streams[] | @base64'); do
+        # Identify which type of stream it is, audio or
+        # subtitle. Ignore other types of streams.
+        case $(echo $stream | base64 -d | jq -r -c '.codec_type') in
+            audio)
+                AUDIO+=($stream)
 
-            AUDIO+=($ROW)
+                for LANG in "${WANTED_LANGS[@]}"; do
+                    if test $(echo $stream | base64 -d | jq -r -c 'select(.tags.language == "'$LANG'")' | wc -l) -ne 0; then
+                        WANTED_AUDIO+=($stream)
+                    fi
+                done
+                ;;
 
-            # Filter through languages we want
-            for LANG in "${WANTED_LANGS[@]}"; do
-                if test $(echo $ROW | grep $LANG | wc -l) -ne 0; then
-                    WANTED_AUDIO+=($ROW)
-                fi
-            done
-        fi
+            subtitle)
+                SUBTITLE+=($stream)
 
-        # Match if current track is a subtitle track
-        if test $(echo $LINE | grep -P $GREP_MATCH_SUBS | wc -l) -ne 0; then
-            ROW=$(echo $LINE | sed -E $SED_EXTRACT_INFO)
+                for LANG in "${WANTED_LANGS[@]}"; do
+                    if test $(echo $stream | base64 -d | jq -r -c 'select(.tags.language == "'$LANG'")' | wc -l) -ne 0; then
+                        WANTED_SUBTITLE+=($stream)
+                    fi
+                done
+                ;;
 
-            SUBTITLE+=($ROW)
+            video)
+                VIDEO+=($stream)
 
-            # Filter through languages we want
-            for LANG in "${WANTED_LANGS[@]}"; do
-                if test $(echo $ROW | grep $LANG | wc -l) -ne 0; then
-                    WANTED_SUBTITLE+=($ROW)
-                fi
-            done
-        fi
+                for LANG in "${WANTED_LANGS[@]}"; do
+                    if test $(echo $stream | base64 -d | jq -r -c 'select(.tags.language == "'$LANG'")' | wc -l) -ne 0; then
+                        WANTED_VIDEO+=($stream)
+                    fi
+                done
+                ;;
+        esac
     done
-    unset IFS
 
 
-    # If there's no wanted audio tracks, just save all the tracks
+    # If there's no wanted video tracks, just save all the tracks.
+    if test ${#WANTED_VIDEO[@]} -eq 0; then
+        WANTED_VIDEO=$VIDEO
+    fi
+
+
+    # If there's no wanted audio tracks, just save all the tracks.
     if test ${#WANTED_AUDIO[@]} -eq 0; then
         WANTED_AUDIO=$AUDIO
     fi
 
 
-    # Check for change and bail out if we don't need to mux the file
-    if test ${#WANTED_AUDIO[@]}    -eq ${#AUDIO[@]}     \
-         -a ${#WANTED_SUBTITLE[@]} -eq ${#SUBTITLE[@]}; then
+    # Check for change and bail out if we don't need to mux the file.
+    if test    ${#WANTED_AUDIO[@]}    -eq ${#AUDIO[@]}    \
+            -a ${#WANTED_SUBTITLE[@]} -eq ${#SUBTITLE[@]} \
+            -a ${#WANTED_VIDEO[@]}    -eq ${#VIDEO[@]}; then
         echo "No change after filtering detected, skipping: "$FILE >&2
         return
     fi
 
 
-    # Start building command to run
-    CMD=$(echo mkvmerge ' -o ' $FILE'.tmp')
+    # Start building command to run.
+    CMD=$(echo 'ffmpeg -i '$FILE)
 
 
-    # Specify audiotracks to keep
+    # Specify video tracks to keep.
+    if ! test ${#WANTED_VIDEO[@]} -eq 0; then
+        for TRACK in "${WANTED_VIDEO[@]}"; do
+            CMD+=" -map 0:v:"$(echo $TRACK | base64 -d | jq -r -c '.index')
+        done
+    fi
+
+
+    # Specify audiotracks to keep.
     if ! test ${#WANTED_AUDIO[@]} -eq 0; then
-        # Build a comma-separated list of all audio track ID's
-        TRACKS=$(echo $(printf "%s\n" "${WANTED_AUDIO[@]}" | cut -f 1) | sed 's/ /,/g')
-
-        # Append to CMD
-        CMD=$(echo $CMD '--audio-tracks' $TRACKS)
-
-        # Loop through all audio tracks and set --default-track to zero for all
-        # tracks
-        for ROW in "${WANTED_AUDIO[@]}"; do
-            CMD=$(echo $CMD '--default-track' $(echo $ROW | cut -d ' ' -f 1):0)
+        for TRACK in "${WANTED_AUDIO[@]}"; do
+            CMD+=" -map 0:a:"$(echo $TRACK | base64 -d | jq -r -c '.index')
+            # Set -disposition:s:0 default to zero somehow to make it not default
         done
     fi
 
 
-    # Specify subtitle tracks to keep
-    if test ${#WANTED_SUBTITLE[@]} -eq 0; then
-        CMD=$(echo $CMD '--no-subtitles')
-    else
-        # Build a comma-separated list of all audio track ID's
-        TRACKS=$(echo $(printf "%s\n" "${WANTED_SUBTITLE[@]}" | cut -f 1) | sed 's/ /,/g')
-
-        # Append to CMD
-        CMD=$(echo $CMD '--subtitle-tracks' $TRACKS)
-
-        # Loop through all audio tracks and set --default-track to zero for all
-        # tracks
-        for ROW in "${WANTED_SUBTITLE[@]}"; do
-            CMD=$(echo $CMD '--default-track' $(echo $ROW | cut -d ' ' -f 1):0)
+    # Specify subtitle tracks to keep.
+    if ! test ${#WANTED_SUBTITLE[@]} -eq 0; then
+        for TRACK in "${WANTED_SUBTITLE[@]}"; do
+            CMD+=" -map 0:s:"$(echo $TRACK | base64 -d | jq -r -c '.index')
+            # Set -disposition:s:0 default to zero somehow to make it not default
         done
     fi
 
+    # Add output filename
+    CMD+=" $FILE.tmp"
 
-    # Append path to original file
-    CMD=$(echo $CMD $FILE)
-
-
-    # Run mkvmerge to remux the file
-    echo -n "Remuxing "$FILE" ... "
+    echo -n "Transcoding $FILE ... "
+    echo $CMD
     OUTPUT=$($CMD)
 
     # Print message success or failure message
     if test $? -ne 0; then
         echo "Failed :("
 
-        echo $OUTPUT
+        # TODO: echo $OUTPUT
 
         # Remove temp file after failure
-        rm $FILE'.tmp'
+        # TODO: rm $FILE'.tmp'
     else
         echo "Success :)"
 
         # Replace original file after success
-        mv $FILE'.tmp' $FILE
+        # TODO: mv $FILE'.tmp' $FILE
     fi
 }
 
