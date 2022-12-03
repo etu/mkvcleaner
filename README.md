@@ -50,35 +50,6 @@ or like this:
 ./mkvtrackcleaner /path/to/file.mkv
 ```
 
-# Configfile
-The config is a simple bash-script that the script sources, it allows
-you to override some variables.
-
-Put the configfile in `$XDG_CONFIG_DIR/mkvtrackcleaner.conf` which by
-default is `$HOME/.config/mkvtrackcleaner.conf`.
-
-So, for example if you want to extend the `WANTED_LANGS` list you could
-have a file that looks like this (to add norwegian):
-```bash
-WANTED_LANGS+=(
-    "nor"
-)
-```
-
-Or you can just override the entire list and roll your own:
-```bash
-WANTED_LANGS=(
-    "und"
-    "eng"
-)
-```
-
-Variables that's possible to alter includes:
-- `$WANTED_LANGS` -- Array with wanted languages in three letter codes.
-- `$GREP_MATCH_AUDIO` -- Regex to match audio tracks.
-- `$GREP_MATCH_SUBS` -- Regex to match subtitle tracks.
-- `$SED_EXTRACT_INFO` -- Regex to extract info about a track.
-
 # Tested on
 - Archlinux x86_64 2016-04-03
 - bash 4.3.42
