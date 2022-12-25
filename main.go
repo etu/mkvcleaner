@@ -26,8 +26,11 @@ func main() {
 	}
 
 	for _, fileName := range fileNames {
+		var ffprobe FFProbe
+
+		ffprobe.Identify(fileName)
+
 		fmt.Println("fileName:", fileName)
-		fmt.Print("metaData: ")
-		fmt.Println(runFFProbe(fileName))
+		fmt.Println("metaData:", ffprobe)
 	}
 }

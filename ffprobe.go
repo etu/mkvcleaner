@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-type FFProbeOutput struct {
+type FFProbe struct {
 	Streams []struct {
 		Index     int    `json:"index"`
 		CodecName string `json:"codec_name"`
@@ -23,7 +23,7 @@ type FFProbeOutput struct {
 	} `json:"streams"`
 }
 
-func runFFProbe(filename string) (*FFProbeOutput, error) {
+func (ffprobe *FFProbe) Identify(fileName string) error {
 	// Set up the command to run `ffprobe` with the desired flags.
 	cmd := exec.Command(
 		"ffprobe",
@@ -31,7 +31,7 @@ func runFFProbe(filename string) (*FFProbeOutput, error) {
 		"-show_entries", "stream",
 		"-print_format", "json",
 		"-v", "panic",
-		"-i", filename,
+		"-i", fileName,
 	)
 
 	// Capture the command's output.
@@ -39,20 +39,18 @@ func runFFProbe(filename string) (*FFProbeOutput, error) {
 
 	if err != nil {
 		// If there was an error running the command, return the error.
-		return nil, fmt.Errorf("Error running ffprobe: %v", err)
+		return fmt.Errorf("Error running ffprobe: %v", err)
 	}
 
 	// Check the command's exit code.
 	if cmd.ProcessState.ExitCode() != 0 {
-		return nil, fmt.Errorf("ffprobe returned a non-zero exit code: %v", cmd.ProcessState.ExitCode())
+		return fmt.Errorf("ffprobe returned a non-zero exit code: %v", cmd.ProcessState.ExitCode())
 	}
 
 	// Parse the JSON output.
-	var data FFProbeOutput
-
-	if err := json.Unmarshal(output, &data); err != nil {
-		return nil, fmt.Errorf("Error parsing JSON output from ffprobe: %v", err)
+	if err := json.Unmarshal(output, ffprobe); err != nil {
+		return fmt.Errorf("Error parsing JSON output from ffprobe: %v", err)
 	}
 
-	return &data, nil
+	return nil
 }
