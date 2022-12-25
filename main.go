@@ -77,6 +77,8 @@ func runFFProbe(filename string) (*FFProbeOutput, error) {
 }
 
 func main() {
+	var fileNames []string
+
 	// Loop over the arguments and check if they are valid file or directory names.
 	for _, arg := range os.Args[1:] {
 		info, err := os.Stat(arg)
@@ -86,13 +88,15 @@ func main() {
 				files := findFilesInDirectory(arg)
 
 				for _, file := range files {
-					// Send each file to the runFFProbe function.
-					runFFProbe(file)
+					fileNames = append(fileNames, file)
 				}
 			} else {
-				// If the argument is a file, send it to the runFFProbe function.
-				runFFProbe(arg)
+				fileNames = append(fileNames, arg)
 			}
 		}
+	}
+
+	for _, fileName := range fileNames {
+		runFFProbe(fileName)
 	}
 }
