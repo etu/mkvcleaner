@@ -8,5 +8,7 @@ pkgs.mkShell {
     findutils      # for find
     gnugrep        # for grep
     gnused         # for sed
+
+    go
   ];
 }
