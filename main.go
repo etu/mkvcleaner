@@ -78,6 +78,13 @@ func processFiles(fileNames []string, wantedLanguages []string) {
 		// Output the table
 		table.Render()
 
+		// Check if a file actually needs processing and ignore if it
+		// doesn't need any changes.
+		if !ffprobe.NeedsProcessing(allTracks) {
+			fmt.Printf("[%d/%d] There's no change to apply to this file\n", fileNo, fileCount)
+			continue
+		}
+
 		fmt.Printf("[%d/%d] Command to execute: %s\n", fileNo, fileCount, ffmpeg.FormatCommandParts())
 		fmt.Printf("[%d/%d] Run ffmpeg command on %s? [Y/n] ", fileNo, fileCount, fileName)
 

@@ -151,3 +151,23 @@ func (ffprobe *FFProbe) GetTracksStatus(tracksToKeep []int) []FFProbeTrack {
 
 	return tracks
 }
+
+func (ffprobe *FFProbe) NeedsProcessing(tracksToKeep []int) bool {
+	var tracksToDelete []int
+
+	for _, track := range ffprobe.Streams {
+		shouldBeKept := false
+
+		for _, trackToKeep := range tracksToKeep {
+			if track.Index == trackToKeep {
+				shouldBeKept = true
+			}
+		}
+
+		if !shouldBeKept {
+			tracksToDelete = append(tracksToDelete, track.Index)
+		}
+	}
+
+	return len(tracksToDelete) > 0
+}
