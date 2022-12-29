@@ -1,2 +1,5 @@
 # Ignore build output
 mkvcleaner
+
+# Ignore nix result path
+result
