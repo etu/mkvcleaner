@@ -38,7 +38,15 @@ func main() {
 
 		ffprobe.Identify(fileName)
 
+		ffmpeg := FFMpeg{
+			inputFilePath:  fileName,
+			audioTracks:    ffprobe.GetAudioTracks([]string{"eng"}),
+			subtitleTracks: ffprobe.GetSubtitleTracks([]string{"eng"}),
+			videoTracks:    ffprobe.GetVideoTracks(),
+		}
+
 		fmt.Printf("[%d/%d] Preparing to process %s\n", fileNo, fileCount, fileName)
+		fmt.Printf("[%d/%d] Command to execute: %s\n", fileNo, fileCount, ffmpeg.FormatCommandParts())
 		fmt.Printf("[%d/%d] Run ffmpeg command on %s? [Y/n] ", fileNo, fileCount, fileName)
 
 		reader := bufio.NewReader(os.Stdin)
@@ -46,17 +54,23 @@ func main() {
 		response = strings.TrimSpace(response)
 
 		if strings.ToLower(response) == "y" || response == "" {
-			ffmpeg := FFMpeg{
-				inputFilePath:  fileName,
-				audioTracks:    ffprobe.GetAudioTracks([]string{"eng"}),
-				subtitleTracks: ffprobe.GetSubtitleTracks([]string{"eng"}),
-				videoTracks:    ffprobe.GetVideoTracks(),
-			}
-
-			fmt.Printf("[%d/%d] Executing: %s\n", fileNo, fileCount, ffmpeg.FormatCommandParts())
 			err := ffmpeg.Run()
 			if err == nil {
 				fmt.Printf("[%d/%d] Sucessfully cleaned up: %s\n", fileNo, fileCount, fileName)
+
+				// Remove the original file
+				err := os.Remove(ffmpeg.inputFilePath)
+				if err != nil {
+					fmt.Printf("[%d/%d] Failed to remove the input file, bailing out by removing the output file\n", fileNo, fileCount)
+
+					os.Remove(ffmpeg.outputFilePath)
+				} else {
+					err := os.Rename(ffmpeg.outputFilePath, ffmpeg.inputFilePath)
+
+					if err != nil {
+						fmt.Printf("[%d/%d] Failed to rename the temporary file to the original file name", fileNo, fileCount)
+					}
+				}
 			} else {
 				fmt.Printf("[%d/%d] Failed at cleaning up: %s\n", fileNo, fileCount, fileName)
 				fmt.Printf("[%d/%d] Error: %s\n", fileNo, fileCount, err)
