@@ -8,6 +8,14 @@ import (
 )
 
 func main() {
+	// TODO: Make this configurable
+	wantedLanguages := []string{
+		"und",
+		"eng",
+		"swe",
+		"jap",
+		"jpn",
+	}
 	var fileNames []string
 
 	// Loop over the arguments and check if they are valid file or directory names.
@@ -40,8 +48,8 @@ func main() {
 
 		ffmpeg := FFMpeg{
 			inputFilePath:  fileName,
-			audioTracks:    ffprobe.GetAudioTracks([]string{"eng"}),
-			subtitleTracks: ffprobe.GetSubtitleTracks([]string{"eng"}),
+			audioTracks:    ffprobe.GetAudioTracks(wantedLanguages),
+			subtitleTracks: ffprobe.GetSubtitleTracks(wantedLanguages),
 			videoTracks:    ffprobe.GetVideoTracks(),
 		}
 
