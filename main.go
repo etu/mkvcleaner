@@ -11,9 +11,13 @@ import (
 )
 
 func main() {
-	// Declare the flag
+	// Declare the flags
 	var wantedLanguages string
+	var automatic bool
+
+	// Define the flags
 	flag.StringVar(&wantedLanguages, "langs", "und,eng,swe,jap,jpn", "comma-separated list of languages")
+	flag.BoolVar(&automatic, "automatic", false, "make the program non-interactive")
 
 	// Parse the flags
 	flag.Parse()
@@ -40,10 +44,10 @@ func main() {
 		}
 	}
 
-	processFiles(fileNames, languages)
+	processFiles(fileNames, languages, automatic)
 }
 
-func processFiles(fileNames []string, wantedLanguages []string) {
+func processFiles(fileNames []string, wantedLanguages []string, automatic bool) {
 	// Count all the files
 	fileCount := len(fileNames)
 	fileNo := 0
@@ -89,18 +93,23 @@ func processFiles(fileNames []string, wantedLanguages []string) {
 		}
 
 		fmt.Printf("[%d/%d] Command to execute: %s\n", fileNo, fileCount, ffmpeg.FormatCommandParts())
-		fmt.Printf("[%d/%d] Run ffmpeg command on %s? [Y/n] ", fileNo, fileCount, fileName)
 
-		// Prompt user for a confirmation of the actions that will be
-		// taken on said file.
-		reader := bufio.NewReader(os.Stdin)
-		response, _ := reader.ReadString('\n')
-		response = strings.TrimSpace(response)
+		// If the doesn't run in automatic mode, we prompt the user
+		// for a confirmation to apply changes.
+		if !automatic {
+			fmt.Printf("[%d/%d] Run ffmpeg command on %s? [Y/n] ", fileNo, fileCount, fileName)
 
-		// Check response, if not yes or empty, skip item.
-		if strings.ToLower(response) != "y" && response != "" {
-			fmt.Printf("[%d/%d] Skipping %s\n", fileNo, fileCount, fileName)
-			continue
+			// Prompt user for a confirmation of the actions that will be
+			// taken on said file.
+			reader := bufio.NewReader(os.Stdin)
+			response, _ := reader.ReadString('\n')
+			response = strings.TrimSpace(response)
+
+			// Check response, if not yes or empty, skip item.
+			if strings.ToLower(response) != "y" && response != "" {
+				fmt.Printf("[%d/%d] Skipping %s\n", fileNo, fileCount, fileName)
+				continue
+			}
 		}
 
 		// Run the ffmpeg command.
