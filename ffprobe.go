@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -22,6 +23,14 @@ type FFProbe struct {
 			Original int `json:"original"`
 		} `json:"disposition"`
 	} `json:"streams"`
+}
+
+type FFProbeTrack struct {
+	Index     string
+	Language  string
+	CodecName string
+	CodecType string
+	Keep      string
 }
 
 func (ffprobe *FFProbe) Identify(fileName string) error {
@@ -116,4 +125,29 @@ func (ffprobe *FFProbe) GetSubtitleTracks(languages []string) []int {
 	}
 
 	return subtitleTracks
+}
+
+func (ffprobe *FFProbe) GetTracksStatus(tracksToKeep []int) []FFProbeTrack {
+	var tracks []FFProbeTrack
+
+	for _, track := range ffprobe.Streams {
+		keep := "❌"
+
+		for _, trackToKeep := range tracksToKeep {
+			if track.Index == trackToKeep {
+				keep = "✅"
+				break
+			}
+		}
+
+		tracks = append(tracks, FFProbeTrack{
+			Index:     strconv.Itoa(track.Index),
+			CodecName: track.CodecName,
+			CodecType: track.CodecType,
+			Language:  track.Tags.Language,
+			Keep:      keep,
+		})
+	}
+
+	return tracks
 }

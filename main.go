@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
@@ -62,6 +64,20 @@ func processFiles(fileNames []string, wantedLanguages []string) {
 
 		// Some nice output.
 		fmt.Printf("[%d/%d] Preparing to process %s\n", fileNo, fileCount, fileName)
+
+		// Merge all the tracks we want to keep to a single slice.
+		allTracks := append(ffmpeg.videoTracks, append(ffmpeg.audioTracks, ffmpeg.subtitleTracks...)...)
+
+		// Print a table for the overview of the changes
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Index", "CodecName", "CodecType", "Language", "Keep"})
+		for _, item := range ffprobe.GetTracksStatus(allTracks) {
+			table.Append([]string{item.Index, item.CodecName, item.CodecType, item.Language, item.Keep})
+		}
+
+		// Output the table
+		table.Render()
+
 		fmt.Printf("[%d/%d] Command to execute: %s\n", fileNo, fileCount, ffmpeg.FormatCommandParts())
 		fmt.Printf("[%d/%d] Run ffmpeg command on %s? [Y/n] ", fileNo, fileCount, fileName)
 
