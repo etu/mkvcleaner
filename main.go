@@ -30,9 +30,14 @@ func main() {
 
 		ffprobe.Identify(fileName)
 
-		fmt.Println("fileName:", fileName)
-		fmt.Println("metaData:", ffprobe)
-		fmt.Println("audio tracks:", ffprobe.GetAudioTracks([]string{"eng"}))
-		fmt.Println("subtitle tracks:", ffprobe.GetSubtitleTracks([]string{"eng"}))
+		ffmpeg := FFMpeg{
+			inputFilePath:  fileName,
+			audioTracks:    ffprobe.GetAudioTracks([]string{"eng"}),
+			subtitleTracks: ffprobe.GetSubtitleTracks([]string{"eng"}),
+			videoTracks:    ffprobe.GetVideoTracks(),
+		}
+
+		fmt.Println("ffmpeg struct:", ffmpeg)
+		fmt.Println("ffmpeg command:", ffmpeg.FormatCommandParts())
 	}
 }
