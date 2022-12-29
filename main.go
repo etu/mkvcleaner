@@ -39,5 +39,10 @@ func main() {
 
 		fmt.Println("ffmpeg struct:", ffmpeg)
 		fmt.Println("ffmpeg command:", ffmpeg.FormatCommandParts())
+
+		fmt.Println("ffmpeg running:")
+		success, err := ffmpeg.Run()
+		fmt.Println("ffmpeg success:", success)
+		fmt.Println("ffmpeg err:", err)
 	}
 }

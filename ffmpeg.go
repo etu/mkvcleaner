@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type FFMpeg struct {
@@ -49,4 +51,14 @@ func (ffmpeg *FFMpeg) FormatCommandParts() []string {
 		},
 		append(videoTracksArgs, append(audioTracksArgs, append(subtitleTracksArgs, ffmpeg.outputFilePath)...)...)...,
 	)
+}
+
+func (ffmpeg *FFMpeg) Run() error {
+	// Get the formatted command parts
+	cmdParts := ffmpeg.FormatCommandParts()
+
+	// Run the ffmpeg command
+	cmd := exec.Command("sh", "-c", strings.Join(cmdParts, " "))
+
+	return cmd.Run()
 }
