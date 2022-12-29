@@ -79,3 +79,27 @@ func (ffprobe *FFProbe) GetAudioTracks(languages []string) []int {
 
 	return audioTracks
 }
+
+func (ffprobe *FFProbe) GetSubtitleTracks(languages []string) []int {
+	var subtitleTracks []int
+
+	for _, stream := range ffprobe.Streams {
+		for _, language := range languages {
+			if stream.CodecType == "subtitle" && strings.Index(stream.Tags.Language, language) != -1 {
+				subtitleTracks = append(subtitleTracks, stream.Index)
+			}
+		}
+	}
+
+	if len(subtitleTracks) == 0 {
+		// If no tracks were found that match the languages provided,
+		// append the index of all subtitle tracks to the subtitleTracks slice.
+		for _, stream := range ffprobe.Streams {
+			if stream.CodecType == "subtitle" {
+				subtitleTracks = append(subtitleTracks, stream.Index)
+			}
+		}
+	}
+
+	return subtitleTracks
+}
