@@ -2,13 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    ffmpeg-full    # for ffprobe and ffmpeg
-    jq             # for jq
-    coreutils-full # for printf, cut, wc
-    findutils      # for find
-    gnugrep        # for grep
-    gnused         # for sed
-
-    go
+    ffmpeg-full # for ffprobe and ffmpeg
+    go          # For building the project
   ];
 }
