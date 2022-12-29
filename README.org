@@ -11,7 +11,7 @@ languages specified is ~und,eng,swe,jap,jpn~. You can override this list
 using the ~--langs~ flag.
 
 #+BEGIN_SRC bash
-  ./mkvcleaner [--langs=und,eng] [--automatic] path/to/directory [path/to/file.mkv] [path/to/other/directory] [...]
+  ./mkvcleaner [--langs=und,eng] [--automatic] path/to/directory [path/to/file.mkv] [path/to/other/directory] […]
 #+END_SRC
 
 By default it will prompt the user about the changes to a file to approve the
