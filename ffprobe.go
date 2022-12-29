@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 type FFProbe struct {
@@ -53,4 +54,28 @@ func (ffprobe *FFProbe) Identify(fileName string) error {
 	}
 
 	return nil
+}
+
+func (ffprobe *FFProbe) GetAudioTracks(languages []string) []int {
+	var audioTracks []int
+
+	for _, stream := range ffprobe.Streams {
+		for _, language := range languages {
+			if stream.CodecType == "audio" && strings.Index(stream.Tags.Language, language) != -1 {
+				audioTracks = append(audioTracks, stream.Index)
+			}
+		}
+	}
+
+	if len(audioTracks) == 0 {
+		// If no tracks were found that match the languages provided,
+		// append the index of all audio tracks to the audioTracks slice.
+		for _, stream := range ffprobe.Streams {
+			if stream.CodecType == "audio" {
+				audioTracks = append(audioTracks, stream.Index)
+			}
+		}
+	}
+
+	return audioTracks
 }

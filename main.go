@@ -32,5 +32,6 @@ func main() {
 
 		fmt.Println("fileName:", fileName)
 		fmt.Println("metaData:", ffprobe)
+		fmt.Println("audio tracks:", ffprobe.GetAudioTracks([]string{"eng"}))
 	}
 }
