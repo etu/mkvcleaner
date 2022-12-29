@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -10,18 +11,20 @@ import (
 )
 
 func main() {
-	// TODO: Make this configurable
-	wantedLanguages := []string{
-		"und",
-		"eng",
-		"swe",
-		"jap",
-		"jpn",
-	}
+	// Declare the flag
+	var wantedLanguages string
+	flag.StringVar(&wantedLanguages, "langs", "und,eng,swe,jap,jpn", "comma-separated list of languages")
+
+	// Parse the flags
+	flag.Parse()
+
+	// Convert the comma-separated string of languages into a slice
+	languages := strings.Split(wantedLanguages, ",")
+
 	var fileNames []string
 
 	// Loop over the arguments and check if they are valid file or directory names.
-	for _, arg := range os.Args[1:] {
+	for _, arg := range flag.Args() {
 		info, err := os.Stat(arg)
 		if err == nil {
 			if info.IsDir() {
@@ -37,7 +40,7 @@ func main() {
 		}
 	}
 
-	processFiles(fileNames, wantedLanguages)
+	processFiles(fileNames, languages)
 }
 
 func processFiles(fileNames []string, wantedLanguages []string) {
