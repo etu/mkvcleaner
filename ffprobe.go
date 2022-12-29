@@ -56,6 +56,20 @@ func (ffprobe *FFProbe) Identify(fileName string) error {
 	return nil
 }
 
+func (ffprobe *FFProbe) GetVideoTracks() []int {
+	var videoTracks []int
+
+	// Go through the streams and append the index of all video tracks
+	// to the videoTracks slice.
+	for _, stream := range ffprobe.Streams {
+		if stream.CodecType == "video" {
+			videoTracks = append(videoTracks, stream.Index)
+		}
+	}
+
+	return videoTracks
+}
+
 func (ffprobe *FFProbe) GetAudioTracks(languages []string) []int {
 	var audioTracks []int
 
