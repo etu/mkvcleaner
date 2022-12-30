@@ -2,7 +2,7 @@
 
 pkgs.buildGoModule {
   pname = "mkvcleaner";
-  version = "20221229";
+  version = "20221230";
 
   src = ./.;
 
