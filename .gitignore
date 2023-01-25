@@ -3,3 +3,6 @@ mkvcleaner
 
 # Ignore nix result path
 result
+
+# Ignore direnv path
+.direnv/
