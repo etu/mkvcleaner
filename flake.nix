@@ -11,7 +11,7 @@
   in {
     packages = flake-utils.lib.flattenTree {
       default = pkgs.buildGoModule (let
-        version = "1.0.${nixpkgs.lib.substring 0 8 self.lastModifiedDate}.${self.shortRev or "dirty"}";
+        version = "1.0.0.${nixpkgs.lib.substring 0 8 self.lastModifiedDate}.${self.shortRev or "dirty"}";
       in {
         pname = "mkvcleaner";
         inherit version;
