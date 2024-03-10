@@ -1,6 +1,6 @@
 module github.com/etu/mkvcleaner
 
-go 1.19
+go 1.21.7
 
 require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
