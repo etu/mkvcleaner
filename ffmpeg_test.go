@@ -128,6 +128,21 @@ func TestFormatCommandParts(t *testing.T) {
 				"'input/.tmp.file with spaces.mkv'",
 			},
 		},
+		{
+			name:           "no audio, subtitle, or video tracks, absolute path",
+			inputFilePath:  "./input/file.mkv",
+			audioTracks:    []int{},
+			subtitleTracks: []int{},
+			videoTracks:    []int{},
+			expectedCmd: []string{
+				"ffmpeg",
+				"-i",
+				"./input/file.mkv",
+				"-c",
+				"copy",
+				"./input/.tmp.file.mkv",
+			},
+		},
 	}
 
 	for _, tt := range tests {
