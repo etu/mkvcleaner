@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -15,12 +16,23 @@ type FFMpeg struct {
 	videoTracks    []int
 }
 
+// escapePath escapes special characters in the file path
+func escapePath(path string) string {
+	// List of characters to be escaped
+	re := regexp.MustCompile(`([&(){}[\]$])`)
+	return re.ReplaceAllString(path, `\$1`)
+}
+
 func (ffmpeg *FFMpeg) FormatCommandParts() []string {
 	// Extract the directory and file name from the path
 	dir, file := filepath.Split(ffmpeg.inputFilePath)
 
-	// Join the directory and modified file name to get the new file path
+	// Set output path
 	ffmpeg.outputFilePath = filepath.Join(dir, ".tmp."+file)
+
+	// Escape paths
+	escapedInputFilePath := escapePath(ffmpeg.inputFilePath)
+	escapedOutputFilePath := escapePath(filepath.Join(dir, ".tmp."+file))
 
 	// Go through audio tracks to append to ffmpeg command
 	audioTracksArgs := []string{}
@@ -45,11 +57,11 @@ func (ffmpeg *FFMpeg) FormatCommandParts() []string {
 		[]string{
 			"ffmpeg",
 			"-i",
-			ffmpeg.inputFilePath,
+			escapedInputFilePath,
 			"-c",
 			"copy",
 		},
-		append(videoTracksArgs, append(audioTracksArgs, append(subtitleTracksArgs, ffmpeg.outputFilePath)...)...)...,
+		append(videoTracksArgs, append(audioTracksArgs, append(subtitleTracksArgs, escapedOutputFilePath)...)...)...,
 	)
 }
 

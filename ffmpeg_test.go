@@ -83,6 +83,21 @@ func TestFormatCommandParts(t *testing.T) {
 				"input/.tmp.file.mkv",
 			},
 		},
+		{
+			name:           "no audio, subtitle, or video tracks, relative path, parentheses in file name",
+			inputFilePath:  "input/file.(foobar).mkv",
+			audioTracks:    []int{},
+			subtitleTracks: []int{},
+			videoTracks:    []int{},
+			expectedCmd: []string{
+				"ffmpeg",
+				"-i",
+				"input/file.\\(foobar\\).mkv",
+				"-c",
+				"copy",
+				"input/.tmp.file.\\(foobar\\).mkv",
+			},
+		},
 	}
 
 	for _, tt := range tests {
