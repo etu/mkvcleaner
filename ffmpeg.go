@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
+
+	"gopkg.in/alessio/shellescape.v1"
 )
 
 type FFMpeg struct {
@@ -16,13 +17,6 @@ type FFMpeg struct {
 	videoTracks    []int
 }
 
-// escapePath escapes special characters in the file path
-func escapePath(path string) string {
-	// List of characters to be escaped
-	re := regexp.MustCompile(`([&(){}[\]$])`)
-	return re.ReplaceAllString(path, `\$1`)
-}
-
 func (ffmpeg *FFMpeg) FormatCommandParts() []string {
 	// Extract the directory and file name from the path
 	dir, file := filepath.Split(ffmpeg.inputFilePath)
@@ -31,8 +25,8 @@ func (ffmpeg *FFMpeg) FormatCommandParts() []string {
 	ffmpeg.outputFilePath = filepath.Join(dir, ".tmp."+file)
 
 	// Escape paths
-	escapedInputFilePath := escapePath(ffmpeg.inputFilePath)
-	escapedOutputFilePath := escapePath(filepath.Join(dir, ".tmp."+file))
+	escapedInputFilePath := shellescape.Quote(ffmpeg.inputFilePath)
+	escapedOutputFilePath := shellescape.Quote(dir + ".tmp." + file)
 
 	// Go through audio tracks to append to ffmpeg command
 	audioTracksArgs := []string{}

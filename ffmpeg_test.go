@@ -92,10 +92,10 @@ func TestFormatCommandParts(t *testing.T) {
 			expectedCmd: []string{
 				"ffmpeg",
 				"-i",
-				"input/file.\\(foobar\\).mkv",
+				"'input/file.(foobar).mkv'",
 				"-c",
 				"copy",
-				"input/.tmp.file.\\(foobar\\).mkv",
+				"'input/.tmp.file.(foobar).mkv'",
 			},
 		},
 	}

@@ -31,7 +31,7 @@
               --prefix PATH : "${pkgs.lib.makeBinPath [pkgs.ffmpeg]}"
           '';
 
-          vendorHash = "sha256-jjZ2XVvy5Qc53HJQ02KPDsmUNpsVFFaj9P/px2U01nQ=";
+          vendorHash = "sha256-yQwDvgEeJBd1aq+/N3tNV0BfSAKUEwfbS3ulRzPxrms=";
         });
       };
 
