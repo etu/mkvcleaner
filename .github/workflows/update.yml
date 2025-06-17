@@ -9,7 +9,7 @@ name: Update
 jobs:
   lock-updater:
     name: Flake Lock Updater
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: write
       contents: write
