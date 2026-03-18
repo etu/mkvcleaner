@@ -37,3 +37,23 @@ wanted languages list. So you may end up without subtitles.
 ## Dependencies
 It's a go program and it depends on `ffprobe` and `ffmpeg` from the `ffmpeg`
 project. `ffprobe` is used to detect changes.
+
+## Development
+
+### Building
+```bash
+make build
+```
+
+### Running Tests
+```bash
+make test
+```
+
+### Nix
+A `flake.nix` is provided with a default package and a dev shell containing
+all necessary tools (`ffmpeg`, `go`, `gopls`, `delve`, `gnumake`).
+
+## Contributing
+See [AGENTS.md](AGENTS.md) for architecture details, conventions, and
+guidelines for working on this project.
