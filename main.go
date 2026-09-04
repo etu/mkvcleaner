@@ -10,17 +10,27 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
+// version is set at build time via -ldflags "-X main.version=...".
+var version = "dev"
+
 func main() {
 	// Declare the flags
 	var wantedLanguages string
 	var automatic bool
+	var showVersion bool
 
 	// Define the flags
 	flag.StringVar(&wantedLanguages, "langs", "und,eng,swe,jap,jpn", "comma-separated list of languages")
 	flag.BoolVar(&automatic, "automatic", false, "make the program non-interactive")
+	flag.BoolVar(&showVersion, "version", false, "print the version and exit")
 
 	// Parse the flags
 	flag.Parse()
+
+	if showVersion {
+		fmt.Println(version)
+		return
+	}
 
 	// Convert the comma-separated string of languages into a slice
 	languages := strings.Split(wantedLanguages, ",")

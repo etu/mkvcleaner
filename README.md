@@ -21,6 +21,12 @@ By default it will prompt the user about the changes to a file to approve the
 changes before it's executed. However, if the `--automatic` flag is provided
 it will skip the confirmation.
 
+Use `--version` to print the build's version and exit:
+
+```bash
+./mkvcleaner --version
+```
+
 ## Notes about languages
 Always keep `und` as a language. Lots of files out there with only one audio
 or subtitle track got it's only track marked as `undefined` language, so you
@@ -44,6 +50,11 @@ project. `ffprobe` is used to detect changes.
 ```bash
 make build
 ```
+
+`make build` embeds a version string derived from `git describe --tags` into
+the binary (falls back to `dev` if that fails). Release builds should be
+built from a tagged commit so `--version` reports a clean semver tag (e.g.
+`1.2.0`) instead of a `<tag>-<commits>-g<sha>` description.
 
 ### Running Tests
 ```bash

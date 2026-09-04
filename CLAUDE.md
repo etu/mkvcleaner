@@ -11,7 +11,7 @@ Repository: `github.com/etu/mkvcleaner`
 ## Commands
 
 ```bash
-make build   # compiles the binary to ./mkvcleaner (go build -o mkvcleaner)
+make build   # compiles ./mkvcleaner, embedding version via `git describe --tags --always --dirty`
 make test    # runs go test
 go test      # equivalent to make test
 go test -run TestName   # run a single test
@@ -29,7 +29,7 @@ Single Go package (`package main`), no sub-packages, all source files at repo ro
 
 | File | Purpose |
 |---|---|
-| `main.go` | Entry point. Parses CLI flags (`--langs`, `--automatic`), resolves file/directory arguments, orchestrates processing with interactive confirmation. |
+| `main.go` | Entry point. Parses CLI flags (`--langs`, `--automatic`, `--version`), resolves file/directory arguments, orchestrates processing with interactive confirmation. Declares the `version` var printed by `--version`, set at build time via `-ldflags -X main.version=...`. |
 | `ffprobe.go` | `FFProbe` struct/methods. Shells out to `ffprobe` to identify streams in an MKV file. Filtering methods: `GetVideoTracks()`, `GetAudioTracks(languages)`, `GetSubtitleTracks(languages)`, `GetTracksStatus(tracksToKeep)`, `NeedsProcessing(tracksToKeep)`. |
 | `ffmpeg.go` | `FFMpeg` struct/methods. Builds and executes the `ffmpeg` remux command with `-c copy` and `-map` flags for selected tracks. Handles shell escaping of file paths via `shellescape`. |
 | `fileutils.go` | `findFilesInDirectory()` — recursively walks a directory tree and returns all `.mkv` file paths. |
@@ -54,7 +54,15 @@ Single Go package (`package main`), no sub-packages, all source files at repo ro
 
 - `--langs`: comma-separated wanted language codes (default: `und,eng,swe,jap,jpn`). Keep `und` in the list — many single-track files mark their only track as `undefined`.
 - `--automatic`: skip interactive per-file confirmation prompts.
+- `--version`: print the version and exit.
 - Positional args: files or directories (directories are scanned recursively for `.mkv` files).
+
+## Versioning
+
+- Releases are tagged with bare semver (`MAJOR.MINOR.PATCH`, no `v` prefix — e.g. `1.1.0`).
+- `main.go` declares `var version = "dev"`, overridden via `-ldflags -X main.version=...` at build time.
+- `make build` sources it from `git describe --tags --always --dirty`.
+- `flake.nix` sources its own version from `self.shortRev` (commit-based, not tag-based — flakes can't easily read git tags during evaluation) and wires it through the same `ldflags`.
 
 ## Dependencies
 

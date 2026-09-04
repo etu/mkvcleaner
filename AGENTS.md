@@ -14,7 +14,7 @@ The project is a single Go package (`package main`) with no sub-packages. All so
 
 | File | Purpose |
 |---|---|
-| `main.go` | Entry point. Parses CLI flags (`--langs`, `--automatic`), resolves file/directory arguments, and orchestrates processing with interactive confirmation. |
+| `main.go` | Entry point. Parses CLI flags (`--langs`, `--automatic`, `--version`), resolves file/directory arguments, and orchestrates processing with interactive confirmation. Declares the `version` package variable that `--version` prints, set at build time via `-ldflags -X main.version=...`. |
 | `ffprobe.go` | `FFProbe` struct and methods. Shells out to `ffprobe` to identify streams in an MKV file. Provides filtering methods: `GetVideoTracks()`, `GetAudioTracks(languages)`, `GetSubtitleTracks(languages)`, `GetTracksStatus(tracksToKeep)`, `NeedsProcessing(tracksToKeep)`. |
 | `ffmpeg.go` | `FFMpeg` struct and methods. Builds and executes the `ffmpeg` remux command with `-c copy` and `-map` flags for selected tracks. Handles shell escaping of file paths via `shellescape`. |
 | `fileutils.go` | `findFilesInDirectory()` — recursively walks a directory tree and returns all `.mkv` file paths. |
@@ -39,7 +39,15 @@ The project is a single Go package (`package main`) with no sub-packages. All so
 
 - `--langs`: Comma-separated list of wanted language codes (default: `und,eng,swe,jap,jpn`).
 - `--automatic`: Skip interactive confirmation prompts.
+- `--version`: Print the version and exit.
 - Positional args: Files or directories to process.
+
+## Versioning
+
+- Releases are tagged with bare semver (`MAJOR.MINOR.PATCH`, no `v` prefix — e.g. `1.1.0`), matching existing tags.
+- `main.go` declares `var version = "dev"`, overridden at build time via `-ldflags "-X main.version=..."`.
+- `make build` sets it from `git describe --tags --always --dirty`, so local/dev builds report something like `1.1.0-3-gabcdef-dirty`; a build from a clean tagged commit reports the bare tag.
+- The Nix package (`flake.nix`) derives its own version from `self.shortRev` (or a date-based fallback when the tree is dirty/unavailable) and wires it through the same `ldflags` mechanism — this tracks the commit, not the semver tag, since flakes can't easily introspect git tags during evaluation.
 
 ## Dependencies
 
