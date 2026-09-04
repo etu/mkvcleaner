@@ -17,7 +17,7 @@ The project is a single Go package (`package main`) with no sub-packages. All so
 | `main.go` | Entry point. Parses CLI flags (`--langs`, `--automatic`, `--version`), resolves file/directory arguments, and orchestrates processing with interactive confirmation. Declares the `version` package variable that `--version` prints, set at build time via `-ldflags -X main.version=...`. |
 | `ffprobe.go` | `FFProbe` struct and methods. Shells out to `ffprobe` to identify streams in an MKV file. Provides filtering methods: `GetVideoTracks()`, `GetAudioTracks(languages)`, `GetSubtitleTracks(languages)`, `GetTracksStatus(tracksToKeep)`, `NeedsProcessing(tracksToKeep)`. |
 | `ffmpeg.go` | `FFMpeg` struct and methods. Builds and executes the `ffmpeg` remux command with `-c copy` and `-map` flags for selected tracks. Handles shell escaping of file paths via `shellescape`. |
-| `fileutils.go` | `findFilesInDirectory()` — recursively walks a directory tree and returns all `.mkv` file paths. |
+| `fileutils.go` | `findFilesInDirectory()` — recursively walks a directory tree and returns all `.mkv` file paths. `copyFilePermissions(srcPath, dstPath)` — copies owner, group, and mode from one file onto another. |
 | `ffmpeg_test.go` | Unit tests for `FFMpeg.FormatCommandParts()`, covering various path formats, special characters, and track combinations. |
 
 ### Key Data Flow
@@ -29,7 +29,7 @@ The project is a single Go package (`package main`) with no sub-packages. All so
 5. Subtitle tracks matching no wanted language are simply removed (no safety fallback).
 6. All video tracks are always kept.
 7. A table is printed showing which tracks will be kept/removed.
-8. If changes are needed and the user confirms (or `--automatic` is set), `ffmpeg` remuxes to a temp file, then the original is atomically replaced via rename.
+8. If changes are needed and the user confirms (or `--automatic` is set), `ffmpeg` remuxes to a temp file. The original file's owner, group, and mode are then copied onto that temp file (`copyFilePermissions` in `fileutils.go`) before it atomically replaces the original via rename — if that permission copy fails, the temp file is discarded and the original is left untouched.
 
 ### CLI Interface
 
@@ -90,6 +90,7 @@ Tests are in `ffmpeg_test.go` and cover the ffmpeg command construction logic.
 - **External tools**: The program shells out to `ffprobe` and `ffmpeg`; it does not use Go bindings.
 - **Error handling**: Errors during processing of individual files are logged and skipped; the tool continues with remaining files.
 - **File safety**: Remuxed output is written to a `.tmp.`-prefixed file, then atomically swapped via `os.Rename`. On failure, the temp file is cleaned up.
+- **Permission preservation**: The remuxed file is chmod/chown'd to match the original's owner, group, and mode (`copyFilePermissions`) before the swap — `os.Chown` requires either running as the file's existing owner (setting the same uid/gid is permitted) or elevated privileges (e.g. root) for anything else.
 - **Testing**: Table-driven tests using the standard `testing` package. No external test frameworks.
 
 ## Important Reminders for Agents

@@ -32,7 +32,7 @@ Single Go package (`package main`), no sub-packages, all source files at repo ro
 | `main.go` | Entry point. Parses CLI flags (`--langs`, `--automatic`, `--version`), resolves file/directory arguments, orchestrates processing with interactive confirmation. Declares the `version` var printed by `--version`, set at build time via `-ldflags -X main.version=...`. |
 | `ffprobe.go` | `FFProbe` struct/methods. Shells out to `ffprobe` to identify streams in an MKV file. Filtering methods: `GetVideoTracks()`, `GetAudioTracks(languages)`, `GetSubtitleTracks(languages)`, `GetTracksStatus(tracksToKeep)`, `NeedsProcessing(tracksToKeep)`. |
 | `ffmpeg.go` | `FFMpeg` struct/methods. Builds and executes the `ffmpeg` remux command with `-c copy` and `-map` flags for selected tracks. Handles shell escaping of file paths via `shellescape`. |
-| `fileutils.go` | `findFilesInDirectory()` — recursively walks a directory tree and returns all `.mkv` file paths. |
+| `fileutils.go` | `findFilesInDirectory()` — recursively walks a directory tree and returns all `.mkv` file paths. `copyFilePermissions(srcPath, dstPath)` — copies owner, group, and mode from one file onto another. |
 | `ffmpeg_test.go` | Unit tests for `FFMpeg.FormatCommandParts()`, covering path formats, special characters, and track combinations. |
 
 ### Key data flow
@@ -44,7 +44,7 @@ Single Go package (`package main`), no sub-packages, all source files at repo ro
 5. Subtitle tracks matching no wanted language are simply removed — no safety fallback (a file can end up with no subtitles).
 6. All video tracks are always kept.
 7. A table is printed showing which tracks will be kept/removed.
-8. If changes are needed and the user confirms (or `--automatic` is set), `ffmpeg` remuxes to a `.tmp.`-prefixed file, then the original is atomically replaced via rename (input renamed to `.rename-tmp`, output renamed to the input's original name, then the `.rename-tmp` file is removed).
+8. If changes are needed and the user confirms (or `--automatic` is set), `ffmpeg` remuxes to a `.tmp.`-prefixed file. The original's owner, group, and mode are copied onto it (`copyFilePermissions`) — if that fails, the temp file is discarded and the original is left untouched. Otherwise the original is atomically replaced via rename (input renamed to `.rename-tmp`, output renamed to the input's original name, then the `.rename-tmp` file is removed).
 
 ### CLI interface
 
@@ -75,5 +75,6 @@ Single Go package (`package main`), no sub-packages, all source files at repo ro
 - No Go bindings for ffmpeg/ffprobe — the program always shells out to the CLI tools.
 - Errors during processing of an individual file are logged and that file is skipped; the tool continues with remaining files.
 - File safety: remuxed output is written to a `.tmp.`-prefixed file, then atomically swapped via `os.Rename`. On failure, the temp file is cleaned up. Preserve this pattern for any new file operations.
+- Permission preservation: the remuxed file is chmod/chown'd (`copyFilePermissions`) to match the original before the swap. `os.Chown` needs either the caller to already own the file (same uid/gid is fine) or root — Unix-only (`syscall.Stat_t`), no Windows support.
 - Keep `README.md` in sync when user-visible behavior changes (new flags, changed defaults, new dependencies).
 - `AGENTS.md` in the repo root contains equivalent guidance for other coding agents — keep it in sync with this file if either is updated.

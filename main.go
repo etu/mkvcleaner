@@ -134,6 +134,16 @@ func processFiles(fileNames []string, wantedLanguages []string, automatic bool) 
 
 		fmt.Printf("[%d/%d] Sucessfully ran ffmpeg command\n", fileNo, fileCount)
 
+		// Apply the original file's owner, group, and mode to the
+		// remuxed output before it takes the original's place.
+		if err := copyFilePermissions(ffmpeg.inputFilePath, ffmpeg.outputFilePath); err != nil {
+			fmt.Printf("[%d/%d] Failed to copy file permissions to the output file, bailing out by removing the output file\n", fileNo, fileCount)
+			fmt.Printf("[%d/%d] Error: %s\n", fileNo, fileCount, err)
+
+			os.Remove(ffmpeg.outputFilePath)
+			continue
+		}
+
 		// Rename the original file to a different temporary path.
 		err = os.Rename(ffmpeg.inputFilePath, ffmpeg.inputFilePath+".rename-tmp")
 

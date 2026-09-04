@@ -40,6 +40,11 @@ at all. Instead it will keep all the audio tracks.
 This script may remove all subtitle tracks if there's no tracks matching the
 wanted languages list. So you may end up without subtitles.
 
+## Notes about file permissions
+The remuxed file's owner, group, and mode are copied from the original file
+before it replaces it, so permissions aren't reset to defaults. Changing the
+owner requires either already owning the file or running as root.
+
 ## Dependencies
 It's a go program and it depends on `ffprobe` and `ffmpeg` from the `ffmpeg`
 project. `ffprobe` is used to detect changes.
